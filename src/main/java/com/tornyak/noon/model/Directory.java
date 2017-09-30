@@ -11,7 +11,7 @@ import lombok.ToString;
 @ToString
 @EqualsAndHashCode
 @Getter
-@JsonPropertyOrder({ "name", "id" })
+@JsonPropertyOrder({ "new-nonce", "new-account",  "new-order", "new-authz", "revoke-cert", "key-change"})
 public final class Directory {
 
 	@JsonProperty("new-nonce")
