@@ -54,6 +54,10 @@ public class Account {
 		this.orders = urlPrefix + "/acct/" + uuid.toString() + "/orders";
 	}
 	
+	public UUID getUUID() {
+		return uuid;
+	}
+	
 	public void activate() {
 		this.status = Status.VALID;
 	}
