@@ -11,11 +11,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/acme/new-nonce")
 public class NonceController {
-	
+
 	@RequestMapping(method = RequestMethod.HEAD)
 	@ResponseStatus(value = HttpStatus.NO_CONTENT)
 	public ResponseEntity<String> newNonce() {
-		 return ResponseEntity.noContent().header("Replay-Nonce", "oFvnlFP1wIhRlYS2jTaXbA").cacheControl(CacheControl.noStore()).build();
+		return ResponseEntity.noContent().header("Replay-Nonce", "oFvnlFP1wIhRlYS2jTaXbA")
+				.cacheControl(CacheControl.noStore()).build();
 	}
-	
+
 }
