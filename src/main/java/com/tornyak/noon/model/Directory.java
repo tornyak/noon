@@ -2,11 +2,16 @@ package com.tornyak.noon.model;
 
 import java.util.Objects;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonPropertyOrder({ "new-nonce", "new-account", "new-order", "new-authz", "revoke-cert", "key-change" })
 public final class Directory {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(Directory.class);
 
 	@JsonProperty("new-nonce")
 	private String newNonce;
@@ -39,6 +44,7 @@ public final class Directory {
 	}
 
 	public Directory(String urlPrefix) {
+		LOGGER.debug("new Directory() urlPrefix={}", urlPrefix);
 		newNonce = urlPrefix + "/new-nonce";
 		newAccount = urlPrefix + "/new-account";
 		newOrder = urlPrefix + "/new-order";

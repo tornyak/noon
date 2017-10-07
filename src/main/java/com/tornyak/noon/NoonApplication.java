@@ -1,6 +1,7 @@
 package com.tornyak.noon;
 
-import org.springframework.beans.factory.annotation.Value;
+import javax.inject.Inject;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.websocket.WebSocketAutoConfiguration;
@@ -13,16 +14,13 @@ import com.tornyak.noon.model.Directory;
 
 @SpringBootApplication(exclude = { WebSocketAutoConfiguration.class })
 public class NoonApplication {
-	@Value("${server.port}")
-	private String serverPort;
-	@Value("${noon.acme.host}")
-	private String acmeHost;
-	@Value("${noon.acme.basepath}")
-	private String acmeBasepath;
+
+	@Inject
+	private NoonConfig noonConfig;
 
 	@Bean
 	protected Directory directory() {
-		return new Directory(acmeHost + ":" + serverPort + acmeBasepath);
+		return new Directory(noonConfig.getBasepath().toString());
 	}
 
 	@Bean
@@ -33,7 +31,7 @@ public class NoonApplication {
 	}
 
 	@Bean
-	FilterRegistrationBean deRegisterHttpPutFormContentFilter(HttpPutFormContentFilter filter) {
+	public FilterRegistrationBean deRegisterHttpPutFormContentFilter(HttpPutFormContentFilter filter) {
 		FilterRegistrationBean bean = new FilterRegistrationBean(filter);
 		bean.setEnabled(false);
 		return bean;

@@ -1,0 +1,17 @@
+security:
+  basic:
+    enabled: false
+    
+noon:
+  acme:
+    url: https://tornyak.com
+    basepath: ${noon.acme.url}/acme
+
+spring:
+  mvc:
+    favicon:
+      enabled: false
+      
+logging:
+  level:
+    root: debug
