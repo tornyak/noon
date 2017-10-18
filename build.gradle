@@ -27,6 +27,7 @@ dependencies {
 	compile('org.springframework.boot:spring-boot-starter-data-jpa')
 	compile('org.springframework.boot:spring-boot-starter-security')
 	compile('org.springframework.boot:spring-boot-starter-web')
+	compile('org.springframework.boot:spring-boot-starter-actuator')
 	// For type safe configuration properties
 	compile('org.springframework.boot:spring-boot-configuration-processor')
 	compile('javax.inject:javax.inject:1')
