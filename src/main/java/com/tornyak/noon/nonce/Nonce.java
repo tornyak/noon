@@ -7,9 +7,11 @@ import org.springframework.util.StringUtils;
 
 public final class Nonce {
 	private final byte[] nonce;
+	private final String base64UrlString;
 
 	public Nonce(byte[] randomBytes) {
 		this.nonce = randomBytes;
+		this.base64UrlString = base64UrlString();
 	}
 	
 	public byte[] getBytes() {
@@ -37,10 +39,10 @@ public final class Nonce {
 	
 	@Override
 	public String toString() {
-		return new String(nonce);
+		return base64UrlString;
 	}
 	
-	public String toBase64UrlString() {
+	private String base64UrlString() {
 		String encoded = Base64.getUrlEncoder().encodeToString(nonce);
 		return StringUtils.trimTrailingCharacter(encoded, '=');
 	}

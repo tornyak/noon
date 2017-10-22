@@ -6,6 +6,7 @@ noon:
   acme:
     url: https://tornyak.com
     basepath: ${noon.acme.url}/acme
+    nonceSize: 16
 
 spring:
   mvc:

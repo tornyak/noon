@@ -3,15 +3,13 @@ package com.tornyak.noon.nonce;
 import java.security.SecureRandom;
 import java.util.function.Supplier;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.CachePut;
 
 public class NonceGenerator implements Supplier<Nonce> {
-	private static final Logger LOGGER = LoggerFactory.getLogger(NonceGenerator.class);
-	
+
 	private SecureRandom secureRandom;
 	private int nonceSize;
-	
+
 	public NonceGenerator(SecureRandom secureRandom, int nonceSize) {
 		this.secureRandom = secureRandom;
 		this.secureRandom.setSeed(System.nanoTime());
@@ -19,6 +17,7 @@ public class NonceGenerator implements Supplier<Nonce> {
 	}
 
 	@Override
+	@CachePut(value = "nonce", key = "#result.toString()")
 	public Nonce get() {
 		byte[] randomBytes = new byte[nonceSize];
 		secureRandom.nextBytes(randomBytes);

@@ -2,24 +2,29 @@ package com.tornyak.noon.nonce;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.security.SecureRandom;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringRunner;
 
+@RunWith(SpringRunner.class)
+@ContextConfiguration(classes = NonceTestConfig.class)
 public class NonceGeneratorTest {
 
-	static final int NONCE_SIZE_BYTES = 16;
-	SecureRandom secureRng = new SecureRandom();
-	NonceGenerator nonceGenerator = new NonceGenerator(secureRng, NONCE_SIZE_BYTES);
+	@Autowired
+	Supplier<Nonce> nonceGenerator;
 
 	@Test
 	public void generateNonce() {
 		Nonce nonce = nonceGenerator.get();
 		assertThat(nonce).isNotNull();
-		assertThat(nonce.getBytes().length).isEqualTo(NONCE_SIZE_BYTES);
+		assertThat(nonce.getBytes().length).isEqualTo(NonceTestConfig.NONCE_SIZE_BYTES);
 	}
 
 	@Test
@@ -33,7 +38,7 @@ public class NonceGeneratorTest {
 		assertThat(nonces.size()).isEqualTo(expectedSize);
 		nonces.forEach(nonce -> {
 			assertThat(nonce).isNotNull();
-			assertThat(nonce.getBytes().length).isEqualTo(NONCE_SIZE_BYTES);
+			assertThat(nonce.getBytes().length).isEqualTo(NonceTestConfig.NONCE_SIZE_BYTES);
 		});
 	}
 	
@@ -47,7 +52,14 @@ public class NonceGeneratorTest {
 
 		assertThat(nonces.size()).isEqualTo(expectedSize);
 		nonces.forEach(nonce -> {
-			assertThat(nonce.toBase64UrlString()).doesNotEndWith("=");
+			assertThat(nonce.toString()).doesNotEndWith("=");
 		});
+	}
+	
+	@Test
+	public void base64UrlEncodingAccordingToRFC7515() {
+		byte[] nonceBytes = new byte[]{3, (byte) 236, (byte) 255, (byte) 224, (byte) 193};
+		Nonce nonce = new Nonce(nonceBytes);
+		assertThat(nonce.toString()).isEqualTo("A-z_4ME");
 	}
 }
