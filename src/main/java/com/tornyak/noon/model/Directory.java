@@ -78,4 +78,28 @@ public final class Directory {
 				+ ", newAuthz=" + newAuthz + ", revokeCert=" + revokeCert + ", keyChange=" + keyChange + "]";
 	}
 
+	public String getNewNonce() {
+		return newNonce;
+	}
+
+	public String getNewAccount() {
+		return newAccount;
+	}
+
+	public String getNewOrder() {
+		return newOrder;
+	}
+
+	public String getNewAuthz() {
+		return newAuthz;
+	}
+
+	public String getRevokeCert() {
+		return revokeCert;
+	}
+
+	public String getKeyChange() {
+		return keyChange;
+	}
+
 }
