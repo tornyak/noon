@@ -1,4 +1,4 @@
-package com.tornyak.noon.model;
+package com.tornyak.noon.rest.payload;
 
 import java.net.URI;
 import java.util.ArrayList;

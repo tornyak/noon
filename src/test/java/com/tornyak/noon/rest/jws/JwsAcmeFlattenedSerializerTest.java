@@ -1,7 +1,7 @@
 package com.tornyak.noon.rest.jws;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.io.ByteArrayOutputStream;
 import java.net.MalformedURLException;
@@ -10,7 +10,6 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.SecureRandom;
 
-import org.jose4j.jwk.JsonWebKey;
 import org.jose4j.jwk.JsonWebKey.Factory;
 import org.jose4j.jws.AlgorithmIdentifiers;
 import org.junit.BeforeClass;
@@ -18,9 +17,9 @@ import org.junit.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.tornyak.noon.model.NewAccountReq;
 import com.tornyak.noon.nonce.Nonce;
 import com.tornyak.noon.rest.jws.JwsAcmeHeader.JwsAcmeHeaderBuilder;
+import com.tornyak.noon.rest.payload.NewAccountReq;
 
 public class JwsAcmeFlattenedSerializerTest {
 
@@ -40,25 +39,10 @@ public class JwsAcmeFlattenedSerializerTest {
 
 	@Test
 	public void testSerializeDeserializeJwk() throws Exception {
-
-		JwsAcmeHeader jwsAcmeHeader = JwsAcmeHeader.builder().algorithm(AlgorithmIdentifiers.RSA_USING_SHA256)
-				.jwk(Factory.newJwk(keyPair.getPublic())).nonce(new Nonce("3YVNunvM6OSd9JQNY_6QvA"))
-				.url(URI.create("http://www.tornyak.com/acme/new-account").toURL()).build();
-
-		JwsAcme jwsAcme = new JwsAcme();
-		jwsAcme.setHeader(jwsAcmeHeader);
-		jwsAcme.setPayload(payloadBytes());
-		jwsAcme.setKey(keyPair.getPrivate());
-		jwsAcme.sign();
-
-		String serialized = jsonObjectMapper.writeValueAsString(jwsAcme);
-
-		JwsAcme jwsAcmeDeserialized = jsonObjectMapper.readValue(serialized, JwsAcme.class);
-		JsonWebKey jwk = jwsAcmeDeserialized.getHeader().getJwk();
-		jwsAcmeDeserialized.setKey(jwk.getKey());
-
-		assertThat(jwsAcmeDeserialized.isSignatureValid()).isTrue();
-		assertEquals(jwsAcme, jwsAcmeDeserialized);
+		JwsAcmeHeader jwsAcmeHeader = defaultHeaderBuilder().jwk(Factory.newJwk(keyPair.getPublic())).build();
+		JwsAcme jwsAcme = JwsAcme.builder().header(jwsAcmeHeader).payload(payloadBytes()).key(keyPair.getPrivate())
+				.signed();
+		serializeDeserialize(jwsAcme);
 	}
 
 	@Test
@@ -66,13 +50,13 @@ public class JwsAcmeFlattenedSerializerTest {
 
 		JwsAcmeHeader jwsAcmeHeader = defaultHeaderBuilder()
 				.kid(URI.create("http://www.tornyak.com/acme/acct/1").toURL()).build();
+		JwsAcme jwsAcme = JwsAcme.builder().header(jwsAcmeHeader).payload(payloadBytes()).key(keyPair.getPrivate())
+				.signed();
+		serializeDeserialize(jwsAcme);
+	}
 
-		JwsAcme jwsAcme = new JwsAcme();
-		jwsAcme.setHeader(jwsAcmeHeader);
-		jwsAcme.setPayload(payloadBytes());
-		jwsAcme.setKey(keyPair.getPrivate());
-		jwsAcme.sign();
-
+	private void serializeDeserialize(JwsAcme jwsAcme) throws Exception {
+		// TODO Auto-generated method stub
 		String serialized = jsonObjectMapper.writeValueAsString(jwsAcme);
 
 		JwsAcme jwsAcmeDeserialized = jsonObjectMapper.readValue(serialized, JwsAcme.class);

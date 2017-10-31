@@ -28,12 +28,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.tornyak.noon.model.Directory;
-import com.tornyak.noon.model.NewAccountReq;
-import com.tornyak.noon.model.NewAccountRsp;
 import com.tornyak.noon.nonce.Nonce;
 import com.tornyak.noon.rest.jws.JwsAcme;
 import com.tornyak.noon.rest.jws.JwsAcmeFlattenedSerializer;
 import com.tornyak.noon.rest.jws.JwsAcmeHeader;
+import com.tornyak.noon.rest.payload.NewAccountReq;
+import com.tornyak.noon.rest.payload.NewAccountRsp;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
@@ -82,11 +82,8 @@ public class NoonApplicationTests {
 				.jwk(Factory.newJwk(keyPair.getPublic())).nonce(new Nonce("3YVNunvM6OSd9JQNY_6QvA"))
 				.url(URI.create("http://www.tornyak.com/acme/new-account").toURL()).build();
 
-		JwsAcme jwsAcme = new JwsAcme();
-		jwsAcme.setHeader(jwsAcmeHeader);
-		jwsAcme.setPayload(newAccountReq());
-		jwsAcme.setKey(keyPair.getPrivate());
-		jwsAcme.sign();
+		JwsAcme jwsAcme = JwsAcme.builder().header(jwsAcmeHeader).payload(newAccountReq()).key(keyPair.getPrivate())
+				.signed();
 
 		ResponseEntity<NewAccountRsp> response = postJws(jwsAcme, NewAccountRsp.class);
 

@@ -1,6 +1,7 @@
 package com.tornyak.noon.rest.jws;
 
 import java.net.URL;
+import java.util.Objects;
 
 import org.jose4j.jwk.JsonWebKey;
 
@@ -30,7 +31,7 @@ public final class JwsAcmeHeader {
 			this.nonce = nonce;
 			return this;
 		}
-		
+
 		public JwsAcmeHeaderBuilder kid(URL keyId) {
 			this.keyId = keyId;
 			return this;
@@ -50,28 +51,28 @@ public final class JwsAcmeHeader {
 			assertNotNull(algorithm, "algorithm");
 			assertNotNull(nonce, "nonce");
 			assertNotNull(url, "url");
-			if(keyId == null && jwk == null) {
+			if (keyId == null && jwk == null) {
 				throw new IllegalStateException("One of \"keyId\" \"jwk\" must be set ");
 			}
-			if(keyId != null && jwk != null) {
+			if (keyId != null && jwk != null) {
 				throw new IllegalStateException("\"keyId\" \"jwk\" must not be set at the same time ");
 			}
-			return new JwsAcmeHeader(algorithm, nonce, keyId, jwk, url);
+			return new JwsAcmeHeader(this);
 		}
-		
+
 		private void assertNotNull(Object o, String name) {
-			if(o == null) {
+			if (o == null) {
 				throw new IllegalStateException(String.format("%s is not set", name));
 			}
 		}
 	}
 
-	protected JwsAcmeHeader(String algorithm, Nonce nonce, URL keyId, JsonWebKey jwk, URL url) {
-		this.algorithm = algorithm;
-		this.nonce = nonce;
-		this.keyId = keyId;
-		this.jwk = jwk;
-		this.url = url;
+	private JwsAcmeHeader(JwsAcmeHeaderBuilder builder) {
+		this.algorithm = builder.algorithm;
+		this.nonce = builder.nonce;
+		this.keyId = builder.keyId;
+		this.jwk = builder.jwk;
+		this.url = builder.url;
 	}
 
 	public static JwsAcmeHeaderBuilder builder() {
@@ -96,5 +97,25 @@ public final class JwsAcmeHeader {
 
 	public URL getUrl() {
 		return url;
+	}
+
+	@Override
+	public boolean equals(Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (other == null || getClass() != other.getClass()) {
+			return false;
+		}
+
+		JwsAcmeHeader otherHeader = (JwsAcmeHeader) other;
+		return Objects.equals(this.algorithm, otherHeader.algorithm) && Objects.equals(this.jwk, otherHeader.jwk)
+				&& Objects.equals(this.keyId, otherHeader.keyId) && Objects.equals(this.nonce, otherHeader.nonce)
+				&& Objects.equals(this.url, otherHeader.url);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(algorithm, jwk, keyId, nonce, url);
 	}
 }

@@ -17,10 +17,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tornyak.noon.NoonConfig;
 import com.tornyak.noon.model.Account.Status;
 import com.tornyak.noon.model.Directory;
-import com.tornyak.noon.model.NewAccountReq;
-import com.tornyak.noon.model.NewAccountRsp;
 import com.tornyak.noon.nonce.Nonce;
 import com.tornyak.noon.rest.jws.JwsAcme;
+import com.tornyak.noon.rest.payload.NewAccountReq;
+import com.tornyak.noon.rest.payload.NewAccountRsp;
 
 @RestController
 @RequestMapping("/acme/new-account")

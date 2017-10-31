@@ -1,6 +1,5 @@
-package com.tornyak.noon.model;
+package com.tornyak.noon.rest.payload;
 
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,11 +30,11 @@ public class NewAccountReq {
 		this.termsOfServiceAgreed = termsOfServiceAgreed;
 	}
 
-	public NewAccountReq(String[] contact, boolean termsOfServiceAgreed) throws MalformedURLException {
+	public NewAccountReq(String[] contact, boolean termsOfServiceAgreed) {
 		this(stringArrayToUriList(contact), termsOfServiceAgreed);
 	}
 
-	private static List<URI> stringArrayToUriList(String[] contact) throws MalformedURLException {
+	private static List<URI> stringArrayToUriList(String[] contact) {
 		List<URI> contactUris = new ArrayList<>();
 		if (contact != null) {
 			for (String s : contact) {

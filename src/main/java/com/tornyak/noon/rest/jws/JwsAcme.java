@@ -17,23 +17,12 @@ public final class JwsAcme {
 
 	private JsonWebSignature jws;
 
-	public JwsAcme() {
+	protected JwsAcme() {
 		jws = new JsonWebSignature();
 	}
 
-	public JwsAcme(JsonWebSignature jws) {
+	protected JwsAcme(JsonWebSignature jws) {
 		this.jws = jws;
-	}
-
-	public void setHeader(JwsAcmeHeader header) {
-		jws.setAlgorithmHeaderValue(header.getAlgorithm());
-		jws.setHeader("nonce", header.getNonce().toString());
-		jws.setHeader("url", header.getUrl().toString());
-		if (header.getJwk() != null) {
-			jws.getHeaders().setJwkHeaderValue("jwk", header.getJwk());
-		} else {
-			jws.setHeader("kid", header.getKeyId().toString());
-		}
 	}
 
 	public JwsAcmeHeader getHeader() throws MalformedURLException, JoseException {
@@ -56,14 +45,6 @@ public final class JwsAcme {
 
 	public String getEncodedHeader() {
 		return jws.getHeaders().getEncodedHeader();
-	}
-
-	public void setPayload(byte[] payloadBytes) {
-		jws.setPayloadBytes(payloadBytes);
-	}
-
-	public void setPayload(String payload) {
-		jws.setPayload(payload);
 	}
 
 	public String getEncodedPayload() {
@@ -116,5 +97,9 @@ public final class JwsAcme {
 	@Override
 	public int hashCode() {
 		return Objects.hash(getEncodedHeader(), getEncodedPayload(), getEncodedSignature());
+	}
+
+	public static JwsAcmeBuilder builder() {
+		return new JwsAcmeBuilder();
 	}
 }
