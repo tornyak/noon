@@ -21,6 +21,6 @@ public class NonceGenerator implements Supplier<Nonce> {
 	public Nonce get() {
 		byte[] randomBytes = new byte[nonceSize];
 		secureRandom.nextBytes(randomBytes);
-		return new Nonce(randomBytes);
+		return Nonce.fromBytes(randomBytes);
 	}
 }

@@ -32,6 +32,11 @@ public final class JwsAcmeHeader {
 			return this;
 		}
 
+		public JwsAcmeHeaderBuilder nonce(String nonce) {
+			this.nonce = Nonce.fromBase64UrlString(nonce);
+			return this;
+		}
+
 		public JwsAcmeHeaderBuilder kid(URL keyId) {
 			this.keyId = keyId;
 			return this;
@@ -97,6 +102,21 @@ public final class JwsAcmeHeader {
 
 	public URL getUrl() {
 		return url;
+	}
+
+	@Override
+	public String toString() {
+		String keyIdString = "";
+		if (keyId != null) {
+			keyIdString = keyId.toString();
+		}
+		String jwkString = "";
+		if (jwk != null) {
+			jwkString = jwk.toString();
+		}
+
+		return String.format("JwsAcmeHeader: algorithm: %s nonce: %s keyId: %s jwk: %s url: %s", algorithm,
+				nonce.toString(), keyIdString, jwkString, url.toString());
 	}
 
 	@Override

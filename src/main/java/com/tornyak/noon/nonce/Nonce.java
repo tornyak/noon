@@ -1,32 +1,51 @@
 package com.tornyak.noon.nonce;
 
-import java.util.Arrays;
 import java.util.Base64;
+import java.util.Objects;
 
 import javax.validation.constraints.NotNull;
 
 import org.springframework.util.StringUtils;
 
 public final class Nonce {
-	private final byte[] nonce;
 	private final String base64UrlString;
 
-	public Nonce(@NotNull byte[] randomBytes) {
-		this.nonce = randomBytes.clone();
-		this.base64UrlString = base64UrlString();
+	public static Nonce fromBytes(@NotNull byte[] bytes) {
+		return new Nonce(bytes);
 	}
 
-	public Nonce(@NotNull String randomString) {
-		this(randomString.getBytes());
+	public static Nonce fromString(@NotNull String string) {
+		return Nonce.fromBytes(string.getBytes());
+	}
+
+	public static Nonce fromBase64UrlString(@NotNull String base64String) {
+		validateBase64Url(base64String);
+		return new Nonce(StringUtils.trimTrailingCharacter(base64String, '='));
+	}
+
+	private Nonce(byte[] randomBytes) {
+		this.base64UrlString = base64UrlString(randomBytes);
+	}
+
+	private Nonce(String base64UrlString) {
+		this.base64UrlString = base64UrlString;
+	}
+
+	private static void validateBase64Url(String string) {
+		Base64.getUrlDecoder().decode(string);
+	}
+
+	private String base64UrlString(byte[] stringBytes) {
+		return Base64.getUrlEncoder().withoutPadding().encodeToString(stringBytes);
 	}
 
 	public byte[] getBytes() {
-		return Arrays.copyOf(this.nonce, nonce.length);
+		return base64UrlString.getBytes();
 	}
 
 	@Override
 	public int hashCode() {
-		return Arrays.hashCode(nonce);
+		return Objects.hashCode(base64UrlString);
 	}
 
 	@Override
@@ -40,16 +59,11 @@ public final class Nonce {
 		}
 
 		Nonce other = (Nonce) object;
-		return Arrays.equals(this.nonce, other.nonce);
+		return Objects.equals(this.base64UrlString, other.base64UrlString);
 	}
 
 	@Override
 	public String toString() {
 		return base64UrlString;
-	}
-
-	private String base64UrlString() {
-		String encoded = Base64.getUrlEncoder().encodeToString(nonce);
-		return StringUtils.trimTrailingCharacter(encoded, '=');
 	}
 }

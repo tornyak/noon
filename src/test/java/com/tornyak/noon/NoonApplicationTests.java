@@ -13,6 +13,8 @@ import org.jose4j.jws.AlgorithmIdentifiers;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -38,6 +40,8 @@ import com.tornyak.noon.rest.payload.NewAccountRsp;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
 public class NoonApplicationTests {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(NoonApplicationTests.class);
 
 	@Autowired
 	private TestRestTemplate restTemplate;
@@ -78,8 +82,11 @@ public class NoonApplicationTests {
 	@Test
 	public void createAccount() throws Exception {
 
+		String nonce = restTemplate.headForHeaders("/acme/new-nonce").getFirst("Replay-Nonce");
+		LOGGER.debug("Received nonce: {}", nonce);
+
 		JwsAcmeHeader jwsAcmeHeader = JwsAcmeHeader.builder().algorithm(AlgorithmIdentifiers.RSA_USING_SHA256)
-				.jwk(Factory.newJwk(keyPair.getPublic())).nonce(new Nonce("3YVNunvM6OSd9JQNY_6QvA"))
+				.jwk(Factory.newJwk(keyPair.getPublic())).nonce(Nonce.fromBase64UrlString(nonce))
 				.url(URI.create("http://www.tornyak.com/acme/new-account").toURL()).build();
 
 		JwsAcme jwsAcme = JwsAcme.builder().header(jwsAcmeHeader).payload(newAccountReq()).key(keyPair.getPrivate())

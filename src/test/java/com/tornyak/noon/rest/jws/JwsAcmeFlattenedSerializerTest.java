@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 
 import java.io.ByteArrayOutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.security.KeyPair;
@@ -66,9 +67,9 @@ public class JwsAcmeFlattenedSerializerTest {
 		assertEquals(jwsAcme, jwsAcmeDeserialized);
 	}
 
-	private JwsAcmeHeaderBuilder defaultHeaderBuilder() throws MalformedURLException {
+	private JwsAcmeHeaderBuilder defaultHeaderBuilder() throws MalformedURLException, UnsupportedEncodingException {
 		return JwsAcmeHeader.builder().algorithm(AlgorithmIdentifiers.RSA_USING_SHA256)
-				.nonce(new Nonce("3YVNunvM6OSd9JQNY_6QvA"))
+				.nonce(Nonce.fromBase64UrlString("3YVNunvM6OSd9JQNY_6QvA"))
 				.url(URI.create("http://www.tornyak.com/acme/new-account").toURL());
 	}
 

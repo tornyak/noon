@@ -15,6 +15,8 @@ import org.springframework.web.filter.HttpPutFormContentFilter;
 
 import com.tornyak.noon.model.Directory;
 import com.tornyak.noon.nonce.NonceGenerator;
+import com.tornyak.noon.nonce.NonceRepository;
+import com.tornyak.noon.nonce.SimpleCachedNonceRepository;
 
 @SpringBootApplication(exclude = { WebSocketAutoConfiguration.class })
 @EnableCaching
@@ -27,11 +29,16 @@ public class NoonApplication {
 	protected Directory directory() {
 		return new Directory(noonConfig.getBasepath().toString());
 	}
-	
+
 	@Bean
 	public NonceGenerator nonceGenetator() {
 		SecureRandom secureRng = new SecureRandom();
 		return new NonceGenerator(secureRng, noonConfig.getNonceSize());
+	}
+
+	@Bean
+	public NonceRepository nonceRepository() {
+		return new SimpleCachedNonceRepository();
 	}
 
 	@Bean

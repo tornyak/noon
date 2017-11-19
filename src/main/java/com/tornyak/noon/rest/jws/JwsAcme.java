@@ -33,7 +33,7 @@ public final class JwsAcme {
 		String url = jws.getHeaders().getStringHeaderValue("url");
 		String kid = jws.getHeaders().getStringHeaderValue("kid");
 
-		builder.algorithm(algorithm).nonce(new Nonce(nonce)).url(URI.create(url).toURL());
+		builder.algorithm(algorithm).nonce(Nonce.fromBase64UrlString(nonce)).url(URI.create(url).toURL());
 		if (kid != null) {
 			builder.kid(URI.create(kid).toURL());
 		} else {
