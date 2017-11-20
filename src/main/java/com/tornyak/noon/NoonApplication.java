@@ -16,6 +16,7 @@ import org.springframework.web.filter.HttpPutFormContentFilter;
 import com.tornyak.noon.model.Directory;
 import com.tornyak.noon.nonce.NonceGenerator;
 import com.tornyak.noon.nonce.NonceRepository;
+import com.tornyak.noon.nonce.NonceValidator;
 import com.tornyak.noon.nonce.SimpleCachedNonceRepository;
 
 @SpringBootApplication(exclude = { WebSocketAutoConfiguration.class })
@@ -39,6 +40,11 @@ public class NoonApplication {
 	@Bean
 	public NonceRepository nonceRepository() {
 		return new SimpleCachedNonceRepository();
+	}
+
+	@Bean
+	public NonceValidator nonceValidator() {
+		return new NonceValidator();
 	}
 
 	@Bean

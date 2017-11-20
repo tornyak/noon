@@ -19,7 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tornyak.noon.NoonConfig;
 import com.tornyak.noon.model.Account.Status;
 import com.tornyak.noon.nonce.Nonce;
-import com.tornyak.noon.nonce.NonceRepository;
+import com.tornyak.noon.nonce.NonceValidator;
 import com.tornyak.noon.rest.error.ProblemDetails;
 import com.tornyak.noon.rest.jws.JwsAcme;
 import com.tornyak.noon.rest.payload.NewAccountReq;
@@ -35,7 +35,7 @@ public class AccountController {
 	private Supplier<Nonce> nonceGenerator;
 
 	@Autowired
-	private NonceRepository nonceRepository;
+	private NonceValidator nonceValidator;
 
 	@Autowired
 	private NoonConfig config;
@@ -48,15 +48,17 @@ public class AccountController {
 		Nonce nonce;
 		try {
 			LOGGER.debug("newAccount: header={}", input.getHeader());
-			String msgNonce = input.getHeader().getNonce().toString();
-			if (!nonceRepository.getAndDelete(msgNonce).isPresent()) {
+			Nonce receivedNonce = input.getHeader().getNonce();
+			if (!nonceValidator.isValid(receivedNonce)) {
+				LOGGER.debug("Invalid nonce: {}", receivedNonce);
 				nonce = nonceGenerator.get();
 				return ResponseEntity.badRequest().header("Replay-Nonce", nonce.toString())
 						.header("Content-Type", "application/problem+json").header("Content-Language", "en")
-						.body(new ProblemDetails("urn:ietf:params:acme:error:unauthorized",
-								"Unknown nonce: " + msgNonce, "https://acme.com/doc/unauthorized"));
+						.body(new ProblemDetails("urn:ietf:params:acme:error:badNonce",
+								"Unacceptable nonce: " + receivedNonce, "https://acme.com/doc/unauthorized"));
 			}
 		} catch (MalformedURLException | JoseException e) {
+			LOGGER.debug(e.getMessage());
 			nonce = nonceGenerator.get();
 			return ResponseEntity.badRequest().header("Replay-Nonce", nonce.toString())
 					.header("Content-Type", "application/problem+json").header("Content-Language", "en")

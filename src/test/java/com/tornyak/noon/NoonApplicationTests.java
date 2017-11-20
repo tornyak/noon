@@ -3,6 +3,7 @@ package com.tornyak.noon;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.net.URI;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -10,6 +11,7 @@ import java.security.SecureRandom;
 
 import org.jose4j.jwk.JsonWebKey.Factory;
 import org.jose4j.jws.AlgorithmIdentifiers;
+import org.jose4j.lang.JoseException;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -82,24 +84,50 @@ public class NoonApplicationTests {
 	@Test
 	public void createAccount() throws Exception {
 
-		String nonce = restTemplate.headForHeaders("/acme/new-nonce").getFirst("Replay-Nonce");
-		LOGGER.debug("Received nonce: {}", nonce);
-
-		JwsAcmeHeader jwsAcmeHeader = JwsAcmeHeader.builder().algorithm(AlgorithmIdentifiers.RSA_USING_SHA256)
-				.jwk(Factory.newJwk(keyPair.getPublic())).nonce(Nonce.fromBase64UrlString(nonce))
-				.url(URI.create("http://www.tornyak.com/acme/new-account").toURL()).build();
-
-		JwsAcme jwsAcme = JwsAcme.builder().header(jwsAcmeHeader).payload(newAccountReq()).key(keyPair.getPrivate())
-				.signed();
-
-		ResponseEntity<NewAccountRsp> response = postJws(jwsAcme, NewAccountRsp.class);
+		Nonce nonce = newNonce();
+		ResponseEntity<NewAccountRsp> response = postNewAccountRequest(nonce);
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 		assertThat(response.getStatusCodeValue()).isEqualTo(201);
 		assertThat(response.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_JSON_UTF8);
 	}
 
-	private byte[] newAccountReq() throws Exception {
+	@Test
+	public void createAccountWithInvalidNonceFails() throws Exception {
+
+		Nonce nonce = Nonce.fromBase64UrlString("Ok10CC_9fwQ-r55v44-YMQ");
+		ResponseEntity<NewAccountRsp> response = postNewAccountRequest(nonce);
+
+		LOGGER.debug("Bad nonce response: {}", response.getBody()); // TODO
+
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+		assertThat(response.getStatusCodeValue()).isEqualTo(400);
+		assertThat(response.getHeaders().getContentType().toString()).isEqualTo("application/problem+json");
+	}
+
+	@Test
+	public void createAccountWithSameNonceTwiceFails() throws Exception {
+
+		Nonce nonce = newNonce();
+		LOGGER.debug("Received nonce: {}", nonce);
+
+		ResponseEntity<NewAccountRsp> response = postNewAccountRequest(nonce);
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+
+		response = postNewAccountRequest(nonce);
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+	}
+
+	private ResponseEntity<NewAccountRsp> postNewAccountRequest(Nonce nonce) throws JoseException, IOException {
+		JwsAcmeHeader jwsAcmeHeader = JwsAcmeHeader.builder().algorithm(AlgorithmIdentifiers.RSA_USING_SHA256)
+				.jwk(Factory.newJwk(keyPair.getPublic())).nonce(nonce)
+				.url(URI.create("http://www.tornyak.com/acme/new-account").toURL()).build();
+		JwsAcme jwsAcme = JwsAcme.builder().header(jwsAcmeHeader).payload(newAccountPayload()).key(keyPair.getPrivate())
+				.signed();
+		return postJws(jwsAcme, NewAccountRsp.class);
+	}
+
+	private byte[] newAccountPayload() throws IOException {
 		NewAccountReq account = new NewAccountReq(
 				new String[] { "mailto:cert-admin@example.com", "tel:+12025551212", "http://www.ninja.jp" }, true);
 
@@ -107,6 +135,11 @@ public class NoonApplicationTests {
 			jsonObjectMapper.writeValue(bos, account);
 			return bos.toByteArray();
 		}
+	}
+
+	private Nonce newNonce() {
+		String nonceString = restTemplate.headForHeaders("/acme/new-nonce").getFirst("Replay-Nonce");
+		return Nonce.fromBase64UrlString(nonceString);
 	}
 
 	private <T> ResponseEntity<T> postJws(JwsAcme jws, Class<T> responseType) throws JsonProcessingException {
